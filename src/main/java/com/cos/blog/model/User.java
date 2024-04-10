@@ -2,6 +2,8 @@ package com.cos.blog.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,6 +21,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @AllArgsConstructor
 @Builder // 빌더 패턴
 @Entity // User 클래스가 MySQL에 테이블이 생성이 된다.
+// @DynamicInsert insert시에 null field를 제외시켜준다.
 public class User {
 
     @Id // Primary key
@@ -34,8 +37,10 @@ public class User {
     @Column(nullable = false, length = 50)
     private String email;
 
-    @ColumnDefault("'user'")
-    private String role; // Enum을 쓰는게 좋다.
+    // @ColumnDefault("user")
+    // DB는 RoleType이라는게 없다.
+    @Enumerated(EnumType.STRING)
+    private RoleType role; // Enum을 쓰는게 좋다. // USER, ADMIN
 
     @CreationTimestamp // 시간이 자동 입력
     private Timestamp createDate;

@@ -3,6 +3,7 @@ package com.cos.blog.test;
 import com.cos.blog.model.RoleType;
 import com.cos.blog.model.User;
 import com.cos.blog.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 // html파일이 아니라 data를 리턴해주는 컨트롤러
@@ -21,6 +24,30 @@ public class DummyControllerTest {
 
     @Autowired // 의존성 주입(DI)
     private UserRepository userRepository;
+
+    // save함수는 id를 전달하지 않으면 insert를 해주고
+    // save함수는 id를 전달하면 해당 id에 대한 데이터가 있으면 update를 해주고
+    // save함수는 id를 전달하면 해당 id에 대한 데이터가 없으면 insert를 함
+    // email, password
+    @Transactional
+    @PutMapping("/dummy/user/{id}")
+    // @RequestBody: json 데이터를 요청 -> Java Object(MessageConverter의 Jackson라이브러리로 변환해서 받아줌.
+    public User updateUser(@PathVariable int id, @RequestBody User requestUser) {
+        System.out.println("id: " + id);
+        System.out.println("password: " + requestUser.getPassword());
+        System.out.println("email: " + requestUser.getEmail());
+
+        User user = userRepository.findById(id).orElseThrow(() -> {
+            return new IllegalArgumentException("수정에 실패하였습니다.");
+        });
+
+        user.setPassword(requestUser.getPassword());
+        user.setEmail(requestUser.getEmail());
+//        userRepository.save(user);
+        
+        // 더티 체킹
+        return null;
+    }
 
     // http://localhost:8000/blog/dummy/user
     @GetMapping("/dummy/users")

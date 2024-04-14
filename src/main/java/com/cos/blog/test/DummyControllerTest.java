@@ -7,10 +7,12 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,11 +27,35 @@ public class DummyControllerTest {
     @Autowired // 의존성 주입(DI)
     private UserRepository userRepository;
 
+
+    @DeleteMapping("/dummy/user/{id}")
+    public String delete(@PathVariable int id) {
+//        if (userRepository.existsById(id)) {
+//            userRepository.deleteById(id);
+//        } else {
+//            new EmptyResultDataAccessException("해당 id를 찾을 수 없습니다.");
+//        }
+
+//        return userRepository.findById(id).map(user -> {
+//            userRepository.delete(user);
+//            return ResponseEntity.ok("삭제되었습니다. id: " + id);
+//        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 id를 찾을 수 없습니다."));
+        try {
+            userRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            System.out.println("삭제실패");
+            return "삭제에 실패하였습니다. 해당 id는 DB에 없습니다.";
+        }
+        userRepository.deleteById(id);
+
+        return "삭제되었습니다. id: " + id;
+    }
+
     // save함수는 id를 전달하지 않으면 insert를 해주고
     // save함수는 id를 전달하면 해당 id에 대한 데이터가 있으면 update를 해주고
     // save함수는 id를 전달하면 해당 id에 대한 데이터가 없으면 insert를 함
     // email, password
-    @Transactional
+    @Transactional // 함수 종료 시에 자동으로 commit 됨
     @PutMapping("/dummy/user/{id}")
     // @RequestBody: json 데이터를 요청 -> Java Object(MessageConverter의 Jackson라이브러리로 변환해서 받아줌.
     public User updateUser(@PathVariable int id, @RequestBody User requestUser) {
@@ -44,9 +70,9 @@ public class DummyControllerTest {
         user.setPassword(requestUser.getPassword());
         user.setEmail(requestUser.getEmail());
 //        userRepository.save(user);
-        
+
         // 더티 체킹
-        return null;
+        return user;
     }
 
     // http://localhost:8000/blog/dummy/user

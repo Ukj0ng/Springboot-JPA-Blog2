@@ -7,7 +7,6 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -30,25 +29,19 @@ public class DummyControllerTest {
 
     @DeleteMapping("/dummy/user/{id}")
     public String delete(@PathVariable int id) {
-//        if (userRepository.existsById(id)) {
+        return userRepository.findById(id).map(user -> {
+            userRepository.delete(user);
+            return "삭제되었습니다. id: " + id;
+        }).orElseThrow(() -> new IllegalArgumentException("삭제에 실패하였습니다. 해당 id는 DB에 없습니다."));
+//        try {
 //            userRepository.deleteById(id);
-//        } else {
-//            new EmptyResultDataAccessException("해당 id를 찾을 수 없습니다.");
+//        } catch (EmptyResultDataAccessException e) {
+//            System.out.println("삭제실패");
+//            return "삭제에 실패하였습니다. 해당 id는 DB에 없습니다.";
 //        }
-
-//        return userRepository.findById(id).map(user -> {
-//            userRepository.delete(user);
-//            return ResponseEntity.ok("삭제되었습니다. id: " + id);
-//        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 id를 찾을 수 없습니다."));
-        try {
-            userRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            System.out.println("삭제실패");
-            return "삭제에 실패하였습니다. 해당 id는 DB에 없습니다.";
-        }
-        userRepository.deleteById(id);
-
-        return "삭제되었습니다. id: " + id;
+//        userRepository.deleteById(id);
+//
+//        return "삭제되었습니다. id: " + id;
     }
 
     // save함수는 id를 전달하지 않으면 insert를 해주고

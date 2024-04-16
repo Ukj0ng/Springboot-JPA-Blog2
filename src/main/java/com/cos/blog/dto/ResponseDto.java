@@ -1,4 +1,4 @@
-package com.cos.blog.controller.dto;
+package com.cos.blog.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +9,6 @@ import org.springframework.http.HttpStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponseDto<T> {
-    HttpStatus status;
+    int status;
     T data;
 }
